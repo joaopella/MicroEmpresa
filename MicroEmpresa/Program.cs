@@ -1,4 +1,7 @@
 
+using MicroEmpresa.Date;
+using Microsoft.EntityFrameworkCore;
+
 namespace MicroEmpresa
 {
     public class Program
@@ -13,6 +16,9 @@ namespace MicroEmpresa
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            builder.Services.AddDbContext<AppDbContext>(opt =>
+                opt.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
+            
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
 
