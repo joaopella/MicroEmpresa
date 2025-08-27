@@ -17,5 +17,6 @@
 
         // Navegações (opcional)
         public ICollection<ProdutosEntity> Produtos { get; set; } = new List<ProdutosEntity>();
+        public ICollection<ClientesEntity> Clientes { get; set; } = new List<ClientesEntity>();
     }
 }

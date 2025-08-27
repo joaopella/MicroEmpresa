@@ -23,7 +23,7 @@ namespace MicroEmpresa.Configuration
             e.Property(x => x.Rv).HasColumnName("rv").IsRowVersion().IsConcurrencyToken();
 
             e.HasOne(x => x.Loja)
-             .WithMany(l => l.Clientes)
+             .WithMany(x => x.Clientes)
              .HasForeignKey(x => x.IdLoja)
              .HasConstraintName("FK_clientes_loja");
         }
