@@ -7,16 +7,10 @@
         public string? Cnpj { get; set; }
         public string? Telefone { get; set; }
 
-        public string? Logradouro { get; set; }
-        public string? Numero { get; set; }
-        public string? Complemento { get; set; }
-        public string? Bairro { get; set; }
-        public string? Cidade { get; set; }
-        public string? Uf { get; set; }
-        public string? Cep { get; set; }
-
-        // Navegações (opcional)
+        // Navegações
+        public ICollection<EnderecosEntity> Enderecos { get; set; } = new List<EnderecosEntity>();
         public ICollection<ProdutosEntity> Produtos { get; set; } = new List<ProdutosEntity>();
         public ICollection<ClientesEntity> Clientes { get; set; } = new List<ClientesEntity>();
+        public ICollection<FuncionariosEntity> Funcionarios { get; set; } = new List<FuncionariosEntity>();
     }
 }
