@@ -4,21 +4,19 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace MicroEmpresa.Configuration;
 
-public class ProdutosConfiguration : IEntityTypeConfiguration<ProdutosEntity>
+public class FuncionariosConfiguration : IEntityTypeConfiguration<FuncionariosEntity>
 {
-    public void Configure(EntityTypeBuilder<ProdutosEntity> e)
+    public void Configure(EntityTypeBuilder<FuncionariosEntity> e)
     {
-        e.ToTable("produtos", "dbo");
+        e.ToTable("funcionarios", "dbo");
         e.HasKey(x => x.Id);
 
         e.Property(x => x.IdLoja).HasColumnName("id_loja").IsRequired();
         e.Property(x => x.Nome).HasColumnName("nome").HasMaxLength(150).IsRequired();
-        e.Property(x => x.Sku).HasColumnName("sku").HasMaxLength(60);
-        e.Property(x => x.Tipo).HasColumnName("tipo").HasMaxLength(10).IsRequired();
-        e.Property(x => x.Unidade).HasColumnName("unidade").HasMaxLength(10);
-
-        e.Property(x => x.PrecoVenda).HasColumnName("preco_venda").HasPrecision(18, 2);
-        e.Property(x => x.Custo).HasColumnName("custo").HasPrecision(18, 2);
+        e.Property(x => x.Cpf).HasColumnName("cpf").HasColumnType("char(11)");
+        e.Property(x => x.Email).HasColumnName("email").HasMaxLength(150);
+        e.Property(x => x.Telefone).HasColumnName("telefone").HasMaxLength(20);
+        e.Property(x => x.Cargo).HasColumnName("cargo").HasMaxLength(80);
         e.Property(x => x.Ativo).HasColumnName("ativo");
 
         e.Property(x => x.CriadoEm).HasColumnName("criado_em");
@@ -26,8 +24,8 @@ public class ProdutosConfiguration : IEntityTypeConfiguration<ProdutosEntity>
         e.Property(x => x.Rv).HasColumnName("rv").IsRowVersion().IsConcurrencyToken();
 
         e.HasOne(x => x.Loja)
-         .WithMany(l => l.Produtos)
+         .WithMany(l => l.Funcionarios)
          .HasForeignKey(x => x.IdLoja)
-         .HasConstraintName("FK_produtos_loja");
+         .HasConstraintName("FK_funcionarios_loja");
     }
 }
