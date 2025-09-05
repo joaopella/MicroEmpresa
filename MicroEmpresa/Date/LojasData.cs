@@ -15,12 +15,11 @@ public class LojasData : ILojasRepository
     public Task<LojasEntity?> ObterAsync(int id) =>
         _db.Lojas.AsNoTracking().FirstOrDefaultAsync(l => l.Id == id);
 
-    public Task<bool> CnpjExisteAsync(string cnpj, int? ignoreId = null)
+    public Task<bool> CnpjExisteAsync(string cnpj)
     {
-        var q = _db.Lojas.AsNoTracking().Where(l => l.Cnpj == cnpj);
-        if (ignoreId is not null) q = q.Where(l => l.Id != ignoreId);
-        return q.AnyAsync();
+        return _db.Lojas.AsNoTracking().AnyAsync(l => l.Cnpj == cnpj);
     }
+
 
     public Task<bool> TemDependenciasAsync(int id) =>
         Task.FromResult(

@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using MicroEmpresa.Entity;
+﻿using MicroEmpresa.Entity;
 using MicroEmpresa.Logic.Lojas;
+using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace MicroEmpresa.Controllers;
 
@@ -18,19 +19,29 @@ public class LojasController : ControllerBase
     [HttpGet("{id:int}")]
     public async Task<ActionResult<LojasEntity>> Obter(int id)
     {
-        var loja = await _svc.ObterAsync(id);
-        return loja is null ? NotFound() : Ok(loja);
+        LojasEntity lojasEntity = new LojasEntity();
+        try
+        {
+            lojasEntity = await _svc.ObterAsync(id);
+
+            return lojasEntity is null ? NotFound() : Ok(lojasEntity);
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        
     }
 
     [HttpPost]
-    public async Task<ActionResult<LojasEntity>> Criar([FromBody] LojasEntity entity)
+    public async Task<ActionResult<LojasEntity>> CriarLoja([FromBody] LojasEntity entity)
     {
         try
         {
-            var created = await _svc.CriarAsync(entity);
-            return CreatedAtAction(nameof(Obter), new { id = created.Id }, created);
+            await _svc.CriarAsync(entity);
+            return Ok(new { message = "Loja cadastrada com sucesso!" });
         }
-        catch (ArgumentException ex)
+        catch (Exception ex)
         {
             return BadRequest(new { message = ex.Message });
         }
@@ -41,8 +52,9 @@ public class LojasController : ControllerBase
     {
         try
         {
-            var updated = await _svc.AtualizarAsync(id, entity);
-            return Ok(updated);
+            await _svc.AtualizarAsync(id, entity);
+
+            return Ok(new { message = "Loja atualizada com sucesso!" });
         }
         catch (KeyNotFoundException)
         {

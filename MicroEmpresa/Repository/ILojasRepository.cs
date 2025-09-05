@@ -6,7 +6,7 @@ public interface ILojasRepository
 {
     Task<List<LojasEntity>> ListarAsync();
     Task<LojasEntity?> ObterAsync(int id);
-    Task<bool> CnpjExisteAsync(string cnpj, int? ignoreId = null);
+    Task<bool> CnpjExisteAsync(string cnpj);
     Task<bool> TemDependenciasAsync(int id);
 
     Task<LojasEntity> CriarAsync(LojasEntity entity);
