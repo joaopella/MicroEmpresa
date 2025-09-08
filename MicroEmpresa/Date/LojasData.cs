@@ -20,7 +20,6 @@ public class LojasData : ILojasRepository
         return _db.Lojas.AsNoTracking().AnyAsync(l => l.Cnpj == cnpj);
     }
 
-
     public Task<bool> TemDependenciasAsync(int id) =>
         Task.FromResult(
             _db.Produtos.Any(p => p.IdLoja == id) ||
@@ -29,25 +28,55 @@ public class LojasData : ILojasRepository
 
     public async Task<LojasEntity> CriarAsync(LojasEntity entity)
     {
-        entity.CriadoEm = DateTime.UtcNow;
-        _db.Lojas.Add(entity);
-        await _db.SaveChangesAsync();
-        return entity;
+        try
+        {
+            entity.CriadoEm = DateTime.UtcNow;
+            _db.Lojas.Add(entity);
+            await _db.SaveChangesAsync();
+            return entity;
+        }
+        catch (DbUpdateException ex)
+        {
+            throw new InvalidOperationException("Erro ao atualizar a loja.", ex);
+        }
+
     }
 
-    public async Task<LojasEntity> AtualizarAsync(int id, LojasEntity entity)
+    public async Task<bool> AtualizarAsync(int id, LojasEntity entity)
     {
-        var atual = await _db.Lojas.FirstOrDefaultAsync(l => l.Id == id);
-        if (atual is null) throw new KeyNotFoundException("Loja não encontrada.");
+        try
+        {
+            entity.Id = id;
+            entity.AtualizadoEm = DateTime.UtcNow;
 
-        atual.NomeFantasia = entity.NomeFantasia;
-        atual.Cnpj = entity.Cnpj;
-        atual.Telefone = entity.Telefone;
-        atual.AtualizadoEm = DateTime.UtcNow;
+            _db.Attach(entity);
 
-        await _db.SaveChangesAsync();
-        return atual;
+            if (!string.IsNullOrWhiteSpace(entity.NomeFantasia))
+            {
+                _db.Entry(entity).Property(x => x.NomeFantasia).IsModified = true;
+            }
+                
+            if (!string.IsNullOrWhiteSpace(entity.Cnpj))
+            {
+                _db.Entry(entity).Property(x => x.Cnpj).IsModified = true;
+            }
+                
+            if (!string.IsNullOrWhiteSpace(entity.Telefone))
+            {
+                _db.Entry(entity).Property(x => x.Telefone).IsModified = true;
+            }
+
+            _db.Entry(entity).Property(x => x.AtualizadoEm).IsModified = true;
+
+            var linhas = await _db.SaveChangesAsync();
+            return linhas > 0;
+        }
+        catch (DbUpdateException ex)
+        {
+            throw new InvalidOperationException("Erro ao atualizar a loja.", ex);
+        }
     }
+
 
     public async Task<bool> RemoverAsync(int id)
     {

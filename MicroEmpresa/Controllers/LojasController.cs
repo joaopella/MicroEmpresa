@@ -20,15 +20,19 @@ public class LojasController : ControllerBase
     public async Task<ActionResult<LojasEntity>> Obter(int id)
     {
         LojasEntity lojasEntity = new LojasEntity();
+        
         try
         {
-            lojasEntity = await _svc.ObterAsync(id);
+            lojasEntity = await _svc.ObterLoja(id);
 
-            return lojasEntity is null ? NotFound() : Ok(lojasEntity);
+            return Ok(lojasEntity);
         }
         catch (Exception ex)
         {
-            throw ex;
+            return BadRequest(new { 
+               message = ex.Message,
+               data = ex.Data,
+            });
         }
         
     }
@@ -43,7 +47,11 @@ public class LojasController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest(new { message = ex.Message });
+            return BadRequest(new
+            {
+                message = ex.Message,
+                data = ex.Data,
+            });
         }
     }
 
@@ -56,13 +64,13 @@ public class LojasController : ControllerBase
 
             return Ok(new { message = "Loja atualizada com sucesso!" });
         }
-        catch (KeyNotFoundException)
+        catch (Exception ex)
         {
-            return NotFound();
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new { message = ex.Message });
+            return BadRequest(new
+            {
+                message = ex.Message,
+                data = ex.Data,
+            });
         }
     }
 
@@ -73,9 +81,13 @@ public class LojasController : ControllerBase
         {
             return await _svc.RemoverAsync(id) ? NoContent() : NotFound();
         }
-        catch (InvalidOperationException ex)
+        catch (Exception ex)
         {
-            return Conflict(new { message = ex.Message });
+            return BadRequest(new
+            {
+                message = ex.Message,
+                data = ex.Data,
+            });
         }
     }
 }

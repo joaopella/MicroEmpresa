@@ -10,20 +10,105 @@ public class LojasLogic : ILojasService
 
     public Task<List<LojasEntity>> ListarAsync() => _repo.ListarAsync();
 
-    public Task<LojasEntity?> ObterAsync(int id)
+    public async Task<LojasEntity> ObterLoja(int id)
     {
-        if (id <= 0)
+        LojasEntity lojasEntity = new LojasEntity();
+        try
         {
-            throw new ArgumentException("ID inválido.");
+            if (id <= 0)
+            {
+                throw new ArgumentException("ID inválido.");
+            }
+
+            lojasEntity = await _repo.ObterAsync(id);
+
+            if (lojasEntity is null)
+            {
+                throw new ArgumentException("Loja não encontrada.");
+            }
+            else
+            {
+                return lojasEntity;
+            }
         }
-            
-        return _repo.ObterAsync(id);
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+        
     }
 
     public async Task<LojasEntity> CriarAsync(LojasEntity lojasEntity)
     {
+        // Sanitização da loja
+        var loja = Tratamento(lojasEntity);
+
+        // ===== Validações de Loja =====
+        if (string.IsNullOrWhiteSpace(loja.NomeFantasia))
+            throw new ArgumentException("Nome Fantasia é obrigatório.");
+
+        if (loja.NomeFantasia.Length > 150)
+            throw new ArgumentException("Nome Fantasia deve ter no máximo 150 caracteres.");
+
+        if (string.IsNullOrWhiteSpace(loja.Cnpj))
+            throw new ArgumentException("CNPJ deve ser preenchido.");
+
+        loja.Cnpj = SomenteDigitos(loja.Cnpj);
+        if (loja.Cnpj.Length != 14)
+            throw new ArgumentException("CNPJ deve conter 14 dígitos.");
+
+        if (await _repo.CnpjExisteAsync(loja.Cnpj))
+            throw new ArgumentException("Já existe uma loja com este CNPJ.");
+
+        if (!string.IsNullOrWhiteSpace(loja.Telefone))
+            loja.Telefone = SomenteDigitos(loja.Telefone);
+
+        // ===== Validação de Endereço =====
+        if (lojasEntity.Enderecos == null || !lojasEntity.Enderecos.Any())
+        {
+            throw new ArgumentException("Toda loja precisa de pelo menos um endereço.");
+        }
+            
+
+        foreach (EnderecosEntity end in lojasEntity.Enderecos)
+        {
+            // sanitização
+            end.Logradouro = end.Logradouro?.Trim() ?? string.Empty;
+            end.Cidade = end.Cidade?.Trim() ?? string.Empty;
+            end.Uf = end.Uf?.Trim().ToUpperInvariant() ?? string.Empty;
+            end.Cep = !string.IsNullOrWhiteSpace(end.Cep)
+                               ? SomenteDigitos(end.Cep)
+                               : null;
+
+            if (string.IsNullOrWhiteSpace(end.Logradouro))
+                throw new ArgumentException("Logradouro do endereço é obrigatório.");
+            if (string.IsNullOrWhiteSpace(end.Cidade))
+                throw new ArgumentException("Cidade do endereço é obrigatória.");
+            if (end.Uf.Length != 2)
+                throw new ArgumentException("UF deve conter 2 letras.");
+            if (!string.IsNullOrWhiteSpace(end.Cep) && end.Cep.Length != 8)
+                throw new ArgumentException("CEP deve conter 8 dígitos.");
+
+            // amarra o endereço à loja
+            end.Loja = loja;
+        }
+
+        // Persiste a loja + endereço(s)
+        return await _repo.CriarAsync(loja);
+    }
+
+
+    public async Task<bool> AtualizarAsync(int id, LojasEntity lojasEntity)
+    {
         try
         {
+            await _repo.ObterAsync(id);
+
+            if (await _repo.ObterAsync(id) is null)
+            {
+                throw new KeyNotFoundException("Loja não encontrada.");
+            }
+
             LojasEntity loja = Tratamento(lojasEntity);
 
             if (string.IsNullOrWhiteSpace(loja.NomeFantasia))
@@ -36,6 +121,7 @@ public class LojasLogic : ILojasService
                 throw new ArgumentException("Nome Fantasia deve ter no máximo 150 caracteres.");
             }
 
+
             if (!string.IsNullOrWhiteSpace(loja.Cnpj))
             {
                 loja.Cnpj = SomenteDigitos(loja.Cnpj);
@@ -43,74 +129,28 @@ public class LojasLogic : ILojasService
                 {
                     throw new ArgumentException("CNPJ deve conter 14 dígitos.");
                 }
-                    
+
                 if (await _repo.CnpjExisteAsync(loja.Cnpj))
                 {
-                    throw new ArgumentException("Já existe uma loja com este CNPJ.");
+                    throw new ArgumentException("Este CNPJ já está em uso por outra loja.");
                 }
-
-            }
-            else
-            {
-                throw new ArgumentException("CNPJ deve ser preenchido.");
             }
 
             if (!string.IsNullOrWhiteSpace(loja.Telefone))
             {
                 loja.Telefone = SomenteDigitos(loja.Telefone!);
             }
-                
 
-            return await _repo.CriarAsync(loja);
+            bool teste = await _repo.AtualizarAsync(id, loja);
+
+            return teste;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            throw ex;
+
+            throw;
         }
         
-    }
-
-    public async Task<LojasEntity> AtualizarAsync(int id, LojasEntity lojasEntity)
-    {
-        await _repo.ObterAsync(id);
-        if(await _repo.ObterAsync(id) is null)
-        {
-            throw new KeyNotFoundException("Loja não encontrada.");
-        }
-
-        LojasEntity loja = Tratamento(lojasEntity);
-
-        if (string.IsNullOrWhiteSpace(loja.NomeFantasia))
-        {
-            throw new ArgumentException("Nome Fantasia é obrigatório.");
-        }
-            
-        if (loja.NomeFantasia.Length > 150)
-        {
-            throw new ArgumentException("Nome Fantasia deve ter no máximo 150 caracteres.");
-        }
-            
-
-        if (!string.IsNullOrWhiteSpace(loja.Cnpj))
-        {
-            loja.Cnpj = SomenteDigitos(loja.Cnpj);
-            if (loja.Cnpj!.Length != 14)
-            {
-                throw new ArgumentException("CNPJ deve conter 14 dígitos.");
-            }
-                
-            if (await _repo.CnpjExisteAsync(loja.Cnpj))
-            {
-                throw new ArgumentException("Este CNPJ já está em uso por outra loja.");
-            }
-        }
-
-        if (!string.IsNullOrWhiteSpace(loja.Telefone))
-        {
-            loja.Telefone = SomenteDigitos(loja.Telefone!);
-        }
-            
-        return await _repo.AtualizarAsync(id, loja);
     }
 
    public async Task<bool> RemoverAsync(int id)

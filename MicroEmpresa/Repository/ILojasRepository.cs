@@ -10,6 +10,6 @@ public interface ILojasRepository
     Task<bool> TemDependenciasAsync(int id);
 
     Task<LojasEntity> CriarAsync(LojasEntity entity);
-    Task<LojasEntity> AtualizarAsync(int id, LojasEntity entity);
+    Task<bool> AtualizarAsync(int id, LojasEntity entity);
     Task<bool> RemoverAsync(int id);
 }
