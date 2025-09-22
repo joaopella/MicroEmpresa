@@ -1,13 +1,21 @@
 ﻿using MicroEmpresa.Entity;
+using MicroEmpresa.LogicInterface;
 using MicroEmpresa.Repository;
 
 namespace MicroEmpresa.Logic.Lojas;
 
-public class LojasLogic : ILojasService
+public class LojasLogic : ILojasLogic
 {
     private readonly ILojasRepository _repo;
-    public LojasLogic(ILojasRepository repo) => _repo = repo;
+    private readonly IEnderecosLogic _enderecosSvc;
 
+    public LojasLogic(ILojasRepository repo, IEnderecosLogic enderecosSvc)
+    {
+        _repo = repo;
+        _enderecosSvc = enderecosSvc;
+    }
+    //Quando eu teste, so veio a lista da loja, não com as tabelas ligadas, por exemplo,
+    //tem a tabela endereço conecta e quando eu chamo o metodo ele nao mostra os endereços. Tratar isso.
     public Task<List<LojasEntity>> ListarAsync() => _repo.ListarAsync();
 
     public async Task<LojasEntity> ObterLoja(int id)
@@ -38,134 +46,124 @@ public class LojasLogic : ILojasService
         
     }
 
-    public async Task<LojasEntity> CriarAsync(LojasEntity lojasEntity)
+    public async Task<ResponseMessage> CriarAsync(LojasEntity lojasEntity)
     {
-        // Sanitização da loja
-        var loja = Tratamento(lojasEntity);
-
-        // ===== Validações de Loja =====
-        if (string.IsNullOrWhiteSpace(loja.NomeFantasia))
-            throw new ArgumentException("Nome Fantasia é obrigatório.");
-
-        if (loja.NomeFantasia.Length > 150)
-            throw new ArgumentException("Nome Fantasia deve ter no máximo 150 caracteres.");
-
-        if (string.IsNullOrWhiteSpace(loja.Cnpj))
-            throw new ArgumentException("CNPJ deve ser preenchido.");
-
-        loja.Cnpj = SomenteDigitos(loja.Cnpj);
-        if (loja.Cnpj.Length != 14)
-            throw new ArgumentException("CNPJ deve conter 14 dígitos.");
-
-        if (await _repo.CnpjExisteAsync(loja.Cnpj))
-            throw new ArgumentException("Já existe uma loja com este CNPJ.");
-
-        if (!string.IsNullOrWhiteSpace(loja.Telefone))
-            loja.Telefone = SomenteDigitos(loja.Telefone);
-
-        // ===== Validação de Endereço =====
-        if (lojasEntity.Enderecos == null || !lojasEntity.Enderecos.Any())
-        {
-            throw new ArgumentException("Toda loja precisa de pelo menos um endereço.");
-        }
-            
-
-        foreach (EnderecosEntity end in lojasEntity.Enderecos)
-        {
-            // sanitização
-            end.Logradouro = end.Logradouro?.Trim() ?? string.Empty;
-            end.Cidade = end.Cidade?.Trim() ?? string.Empty;
-            end.Uf = end.Uf?.Trim().ToUpperInvariant() ?? string.Empty;
-            end.Cep = !string.IsNullOrWhiteSpace(end.Cep)
-                               ? SomenteDigitos(end.Cep)
-                               : null;
-
-            if (string.IsNullOrWhiteSpace(end.Logradouro))
-                throw new ArgumentException("Logradouro do endereço é obrigatório.");
-            if (string.IsNullOrWhiteSpace(end.Cidade))
-                throw new ArgumentException("Cidade do endereço é obrigatória.");
-            if (end.Uf.Length != 2)
-                throw new ArgumentException("UF deve conter 2 letras.");
-            if (!string.IsNullOrWhiteSpace(end.Cep) && end.Cep.Length != 8)
-                throw new ArgumentException("CEP deve conter 8 dígitos.");
-
-            // amarra o endereço à loja
-            end.Loja = loja;
-        }
-
-        // Persiste a loja + endereço(s)
-        return await _repo.CriarAsync(loja);
-    }
-
-
-    public async Task<bool> AtualizarAsync(int id, LojasEntity lojasEntity)
-    {
+        
         try
         {
-            await _repo.ObterAsync(id);
+            // Sanitização da loja
+            var loja = Tratamento(lojasEntity);
 
-            if (await _repo.ObterAsync(id) is null)
-            {
-                throw new KeyNotFoundException("Loja não encontrada.");
-            }
+            // ===== Validações de Loja =====
+            
 
-            LojasEntity loja = Tratamento(lojasEntity);
-
-            if (string.IsNullOrWhiteSpace(loja.NomeFantasia))
-            {
-                throw new ArgumentException("Nome Fantasia é obrigatório.");
-            }
 
             if (loja.NomeFantasia.Length > 150)
             {
-                throw new ArgumentException("Nome Fantasia deve ter no máximo 150 caracteres.");
+                return new ResponseMessage { Message = "Nome Fantasia deve ter no máximo 150 caracteres." };
             }
 
+
+            if (string.IsNullOrWhiteSpace(loja.Cnpj))
+            {
+                return new ResponseMessage { Message = "CNPJ deve ser preenchido." };
+            }
+
+
+            loja.Cnpj = SomenteDigitos(loja.Cnpj);
+
+            if (loja.Cnpj.Length != 14)
+            {
+                return new ResponseMessage { Message = "CNPJ deve conter 14 dígitos." };
+            }
+
+
+            if (await _repo.CnpjExisteAsync(loja.Cnpj))
+            {
+                return new ResponseMessage {  Message = "Já existe uma loja com este CNPJ." };
+            }
+
+
+            if (!string.IsNullOrWhiteSpace(loja.Telefone))
+            {
+                loja.Telefone = SomenteDigitos(loja.Telefone);
+            }
+
+            if (lojasEntity.Enderecos == null || !lojasEntity.Enderecos.Any())
+            {
+                return new ResponseMessage { Message = "Toda loja precisa de pelo menos um endereço." };
+            }
+
+            LojasEntity criada = await _repo.CriarAsync(loja);
+
+            foreach (var end in lojasEntity.Enderecos)
+            {
+                end.IdLoja = criada.Id;  
+                await _enderecosSvc.CriarAsync(end);
+            }
+
+            return new ResponseMessage
+            {
+                Message = "Loja cadastrada com sucesso!",
+            };
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }   
+    }
+
+    public async Task<ResponseMessage> AtualizarAsync(int id, LojasEntity lojasEntity)
+    {
+        try
+        {
+            var existe = await _repo.ObterAsync(id);
+            if (existe is null) return new ResponseMessage { Message = "Loja não encontrada." };
+
+            var loja = Tratamento(lojasEntity);
+
+            if (string.IsNullOrWhiteSpace(loja.NomeFantasia))
+                return new ResponseMessage { Message = "Nome Fantasia é obrigatório." };
+
+            if (loja.NomeFantasia.Length > 150)
+                return new ResponseMessage { Message = "Nome Fantasia deve ter no máximo 150 caracteres." };
 
             if (!string.IsNullOrWhiteSpace(loja.Cnpj))
             {
                 loja.Cnpj = SomenteDigitos(loja.Cnpj);
-                if (loja.Cnpj!.Length != 14)
-                {
-                    throw new ArgumentException("CNPJ deve conter 14 dígitos.");
-                }
+                if (loja.Cnpj.Length != 14)
+                    return new ResponseMessage { Message = "CNPJ deve conter 14 dígitos." };
 
                 if (await _repo.CnpjExisteAsync(loja.Cnpj))
-                {
-                    throw new ArgumentException("Este CNPJ já está em uso por outra loja.");
-                }
+                    return new ResponseMessage { Message = "Este CNPJ já está em uso por outra loja." };
             }
 
             if (!string.IsNullOrWhiteSpace(loja.Telefone))
-            {
-                loja.Telefone = SomenteDigitos(loja.Telefone!);
-            }
+                loja.Telefone = SomenteDigitos(loja.Telefone);
 
-            bool teste = await _repo.AtualizarAsync(id, loja);
-
-            return teste;
+            var ok = await _repo.AtualizarAsync(id, loja);
+            return new ResponseMessage { Message = ok ? "Loja atualizada com sucesso!" : "Nada foi alterado." };
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-
-            throw;
+            throw ex;
         }
         
     }
 
-   public async Task<bool> RemoverAsync(int id)
-{
-    // opção B — pré-checagem com mensagem de negócio
-    if (await _repo.TemDependenciasAsync(id))
-        throw new InvalidOperationException("Não é possível excluir: há dados vinculados.");
+    public async Task<ResponseMessage> RemoverAsync(int id)
+    {
+        if (id <= 0) return new ResponseMessage { Message = "ID inválido." };
 
-    var ok = await _repo.RemoverAsync(id);
-    if (!ok) throw new KeyNotFoundException("Loja não encontrada.");
-    return true;
-}
+        if (await _repo.TemDependenciasAsync(id))
+            return new ResponseMessage { Message = "Não é possível excluir: há dados vinculados." };
 
+        var ok = await _repo.RemoverAsync(id);
+        return new ResponseMessage { Message = ok ? "Loja removida com sucesso!" : "Loja não encontrada." };
+    }
 
-    // helpers
+    #region Metodos Auxiliares
+
     private static LojasEntity Tratamento(LojasEntity e) => new()
     {
         NomeFantasia = (e.NomeFantasia ?? string.Empty).Trim(),
@@ -174,4 +172,6 @@ public class LojasLogic : ILojasService
     };
 
     private static string SomenteDigitos(string s) => new(s.Where(char.IsDigit).ToArray());
+
+    #endregion Metodos Auxiliares
 }

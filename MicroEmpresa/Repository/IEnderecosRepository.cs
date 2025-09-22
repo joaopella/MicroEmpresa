@@ -7,7 +7,7 @@ namespace MicroEmpresa.Repository
         Task<List<EnderecosEntity>> ListarAsync();
         Task<EnderecosEntity?> ObterAsync(int id);
         Task CriarAsync(EnderecosEntity entity);
-        Task<bool> AtualizarAsync(int id, EnderecosEntity entity); // update parcial
+        Task<bool> AtualizarAsync(int id, EnderecosEntity entity);
         Task<bool> RemoverAsync(int id);
     }
 }

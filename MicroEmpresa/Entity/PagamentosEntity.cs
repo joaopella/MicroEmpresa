@@ -14,5 +14,7 @@
 
         // Navegação
         public VendasEntity Venda { get; set; } = default!;
+        public ICollection<MovCaixaEntity> MovimentosCaixa { get; set; } = new List<MovCaixaEntity>();
+
     }
 }

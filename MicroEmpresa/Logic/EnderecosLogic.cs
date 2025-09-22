@@ -4,10 +4,10 @@ using MicroEmpresa.Repository;
 
 namespace MicroEmpresa.Logic
 {
-    public class EnderecosService : IEnderecosLogic
+    public class EnderecosLogic : IEnderecosLogic
     {
         private readonly IEnderecosRepository _repo;
-        public EnderecosService(IEnderecosRepository repo) => _repo = repo;
+        public EnderecosLogic(IEnderecosRepository repo) => _repo = repo;
 
         public Task<List<EnderecosEntity>> ListarAsync() => _repo.ListarAsync();
 

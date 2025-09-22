@@ -9,8 +9,8 @@ namespace MicroEmpresa.Controllers;
 [Route("api/lojas")]
 public class LojasController : ControllerBase
 {
-    private readonly ILojasService _svc;
-    public LojasController(ILojasService svc) => _svc = svc;
+    private readonly ILojasLogic _svc;
+    public LojasController(ILojasLogic svc) => _svc = svc;
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<LojasEntity>>> Listar()
@@ -38,12 +38,12 @@ public class LojasController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<LojasEntity>> CriarLoja([FromBody] LojasEntity entity)
+    public async Task<ActionResult<ResponseMessage>> CriarLoja([FromBody] LojasEntity entity)
     {
         try
         {
-            await _svc.CriarAsync(entity);
-            return Ok(new { message = "Loja cadastrada com sucesso!" });
+            return await _svc.CriarAsync(entity);
+            
         }
         catch (Exception ex)
         {
@@ -51,6 +51,12 @@ public class LojasController : ControllerBase
             {
                 message = ex.Message,
                 data = ex.Data,
+                teste = ex.Source,
+                teste1 = ex.InnerException,
+                teste2 = ex.StackTrace,
+                tste3 = ex.HelpLink,
+                teste4 = ex.TargetSite,
+                teste5 = ex.HResult
             });
         }
     }
@@ -75,11 +81,11 @@ public class LojasController : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
-    public async Task<IActionResult> Remover(int id)
+    public async Task<ActionResult<ResponseMessage>> Remover(int id)
     {
         try
         {
-            return await _svc.RemoverAsync(id) ? NoContent() : NotFound();
+            return await _svc.RemoverAsync(id);
         }
         catch (Exception ex)
         {

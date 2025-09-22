@@ -10,7 +10,7 @@ public class FuncionariosConfiguration : IEntityTypeConfiguration<FuncionariosEn
     {
         e.ToTable("funcionarios", "dbo");
         e.HasKey(x => x.Id);
-
+        //Colocar a  coluna salario, guardar talvez a carteira de trabalho.
         e.Property(x => x.IdLoja).HasColumnName("id_loja").IsRequired();
         e.Property(x => x.Nome).HasColumnName("nome").HasMaxLength(150).IsRequired();
         e.Property(x => x.Cpf).HasColumnName("cpf").HasColumnType("char(11)");
