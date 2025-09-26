@@ -1,22 +1,24 @@
 ﻿using MicroEmpresa.Date;
 using MicroEmpresa.Entity;
 using MicroEmpresa.LogicInterface;
+using MicroEmpresa.Repository;
 using Microsoft.EntityFrameworkCore;
 
 namespace MicroEmpresa.Logic
 {
     public class EstoquesLogic : IEstoquesLogic
     {
-        private readonly EstoquesData _data;
+        private readonly IEstoquesRepository _repo;        // << interface
 
-        public EstoquesLogic(EstoquesData data) => _data = data;
+        public EstoquesLogic(IEstoquesRepository repo)     // << interface
+            => _repo = repo;
 
-        public Task<List<EstoquesEntity>> ListarAsync() => _data.ListarAsync();
+        public Task<List<EstoquesEntity>> ListarAsync() => _repo.ListarAsync();
 
-        public Task<EstoquesEntity?> ObterAsync(int id) => _data.ObterAsync(id);
+        public Task<EstoquesEntity?> ObterAsync(int id) => _repo.ObterAsync(id);
 
         public Task<EstoquesEntity?> ObterPorLojaProdutoAsync(int idLoja, int idProduto)
-            => _data.ObterPorLojaProdutoAsync(idLoja, idProduto);
+            => _repo.ObterPorLojaProdutoAsync(idLoja, idProduto);
 
         public async Task<ResponseMessage> CriarAsync(EstoquesEntity e)
         {
@@ -26,10 +28,10 @@ namespace MicroEmpresa.Logic
             if (e.Saldo < 0) return new ResponseMessage { Message = "Saldo não pode ser negativo." };
 
             // um estoque por (Loja, Produto)
-            var existente = await _data.ObterPorLojaProdutoAsync(e.IdLoja, e.IdProduto);
+            var existente = await _repo.ObterPorLojaProdutoAsync(e.IdLoja, e.IdProduto);
             if (existente is not null) return new ResponseMessage { Message = "Já existe estoque para essa Loja/Produto." };
 
-            await _data.CriarAsync(e);
+            await _repo.CriarAsync(e);
             return new ResponseMessage { Message = "OK" };
         }
 
@@ -43,7 +45,7 @@ namespace MicroEmpresa.Logic
 
             try
             {
-                var ok = await _data.AtualizarAsync(e);
+                var ok = await _repo.AtualizarAsync(e);
                 return ok ? new ResponseMessage { Message = "OK" }
                           : new ResponseMessage { Message = "Estoque não encontrado." };
             }
@@ -58,7 +60,7 @@ namespace MicroEmpresa.Logic
             if (id <= 0) return new ResponseMessage { Message = "ID inválido." };
             if (rv is null || rv.Length == 0) return new ResponseMessage { Message = "RowVersion (Rv) é obrigatório." };
 
-            var e = await _data.ObterAsync(id);
+            var e = await _repo.ObterAsync(id);
             if (e is null) return new ResponseMessage { Message = "Estoque não encontrado." };
 
             var novoSaldo = e.Saldo + delta;
@@ -70,7 +72,7 @@ namespace MicroEmpresa.Logic
 
             try
             {
-                var ok = await _data.AtualizarCamposAsync(e, setLojaProduto: false);
+                var ok = await _repo.AtualizarCamposAsync(e, setLojaProduto: false);
                 return ok ? new ResponseMessage { Message = "OK" }
                           : new ResponseMessage { Message = "Estoque não encontrado." };
             }
@@ -82,7 +84,7 @@ namespace MicroEmpresa.Logic
 
         public async Task<ResponseMessage> ExcluirAsync(int id)
         {
-            var ok = await _data.ExcluirAsync(id);
+            var ok = await _repo.ExcluirAsync(id);
             return ok ? new ResponseMessage { Message = "OK" }
                       : new ResponseMessage { Message = "Estoque não encontrado." };
         }

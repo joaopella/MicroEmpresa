@@ -1,5 +1,6 @@
 ﻿using MicroEmpresa.Entity;
-using MicroEmpresa.Logic.Lojas;
+using MicroEmpresa.Logic;
+using MicroEmpresa.LogicInterface;
 using Microsoft.AspNetCore.Mvc;
 using System;
 

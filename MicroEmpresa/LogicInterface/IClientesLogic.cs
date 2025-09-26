@@ -2,7 +2,7 @@
 
 namespace MicroEmpresa.LogicInterface
 {
-    public interface IClientesService
+    public interface IClientesLogic
     {
         Task<List<ClientesEntity>> ListarAsync();
         Task<ClientesEntity> ObterAsync(int id);

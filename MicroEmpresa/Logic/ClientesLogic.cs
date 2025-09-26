@@ -4,10 +4,10 @@ using MicroEmpresa.Repository;
 
 namespace MicroEmpresa.Logic
 {
-    public class ClientesService : IClientesService
+    public class ClientesLogic : IClientesLogic
     {
         private readonly IClientesRepository _repo;
-        public ClientesService(IClientesRepository repo) => _repo = repo;
+        public ClientesLogic(IClientesRepository repo) => _repo = repo;
 
         public Task<List<ClientesEntity>> ListarAsync() => _repo.ListarAsync();
 

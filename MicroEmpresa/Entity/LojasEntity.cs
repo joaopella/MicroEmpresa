@@ -12,5 +12,6 @@
         public ICollection<ProdutosEntity> Produtos { get; set; } = new List<ProdutosEntity>();
         public ICollection<ClientesEntity> Clientes { get; set; } = new List<ClientesEntity>();
         public ICollection<FuncionariosEntity> Funcionarios { get; set; } = new List<FuncionariosEntity>();
+        public object UsuariosOnline { get; internal set; }
     }
 }
