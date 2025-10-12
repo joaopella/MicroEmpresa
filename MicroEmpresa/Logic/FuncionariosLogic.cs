@@ -20,33 +20,61 @@ namespace MicroEmpresa.Logic
         public Task<FuncionariosEntity?> ObterAsync(int id) =>
             id <= 0 ? Task.FromResult<FuncionariosEntity?>(null) : _repo.ObterAsync(id);
 
-        public async Task<ResponseMessage> CriarAsync(FuncionariosEntity entity)
+        public async Task<ResponseMessage> CriarAsync(FuncionariosEntity funcionariosEntity)
         {
-            var f = Sanitizar(entity);
+            var funcionario = Sanitizar(funcionariosEntity);
 
-            if (f.IdLoja <= 0)
-                return new ResponseMessage { Message = "Loja é obrigatória." };
-
-            _ = await _lojasRepo.ObterAsync(f.IdLoja) ?? null; // se quiser validar existência, mude para msg
-
-            if (string.IsNullOrWhiteSpace(f.Nome))
-                return new ResponseMessage { Message = "Nome é obrigatório." };
-
-            if (!string.IsNullOrWhiteSpace(f.Cpf))
+            if (string.IsNullOrEmpty(funcionario.Nome))
             {
-                f.Cpf = SomenteDigitos(f.Cpf);
-                if (f.Cpf.Length != 11)
-                    return new ResponseMessage { Message = "CPF deve conter 11 dígitos." };
-
-                if (await _repo.CpfExisteAsync(f.Cpf))
-                    return new ResponseMessage { Message = "Já existe um funcionário com este CPF." };
+                return new ResponseMessage { Message = "Nome é obrigatório." };
             }
 
-            if (!string.IsNullOrWhiteSpace(f.Telefone))
-                f.Telefone = SomenteDigitos(f.Telefone);
+            if (string.IsNullOrEmpty(funcionario.Email))
+            {
+                return new ResponseMessage { Message = "Email é obrigatório." };
+            }
 
-            await _repo.CriarAsync(f);
-            return new ResponseMessage { Message = "Funcionário cadastrado com sucesso!" };
+            if (!string.IsNullOrEmpty(funcionario.Cpf))
+            {
+                funcionario.Cpf = SomenteDigitos(funcionario.Cpf);
+                if (funcionario.Cpf.Length != 11)
+                {
+                    return new ResponseMessage { Message = "CPF deve conter 11 dígitos." };
+                }
+                    
+                if (await _repo.CpfExisteAsync(funcionario.Cpf))
+                {
+                    return new ResponseMessage { Message = "Já existe um funcionário com este CPF." };
+                }
+            }
+
+            if (!string.IsNullOrEmpty(funcionario.Telefone))
+            {
+                funcionario.Telefone = SomenteDigitos(funcionario.Telefone);
+            }
+
+            bool existe = await _repo.CpfExisteAsync(funcionario.Cnpj);
+
+            if (existe)
+            {
+                int id = await _repo.BuscarIdLojaPorCnpjAsync(funcionario.Cnpj);
+
+                if (id <= 0)
+                {
+                    return new ResponseMessage { Message = "CNPJ não encontrado." };
+                }
+                else 
+                {
+                    funcionario.IdLoja = id;
+
+                    await _repo.CriarAsync(funcionario);
+                    return new ResponseMessage { Message = "Funcionário cadastrado com sucesso!" };
+                }
+            }
+            else
+            {
+                return new ResponseMessage { Message = "CNPJ inválido." };
+            }
         }
 
         public async Task<ResponseMessage> AtualizarAsync(int id, FuncionariosEntity entity)

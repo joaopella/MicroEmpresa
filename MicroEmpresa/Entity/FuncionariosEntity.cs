@@ -1,17 +1,28 @@
-﻿namespace MicroEmpresa.Entity
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace MicroEmpresa.Entity
 {
     public class FuncionariosEntity : AuditableEntity
     {
         public int Id { get; set; }
         public int IdLoja { get; set; }
+
         public string Nome { get; set; } = default!;
         public string? Cpf { get; set; }
         public string? Email { get; set; }
         public string? Telefone { get; set; }
-        public string? Cargo { get; set; }             // caixa, gerente, atendente...
+
         public bool Ativo { get; set; }
 
-        // Navegação
+        // FK para perfis
+        public int IdPerfil { get; set; }
+
+        // Navegações
         public LojasEntity Loja { get; set; } = default!;
+        public PerfisEntity Perfil { get; set; } = default!;
+
+        // Só para input/consulta (não existe na tabela)
+        [NotMapped]
+        public string? Cnpj { get; set; }
     }
 }

@@ -34,5 +34,5 @@ public class UsuariosOnlineConfiguration : IEntityTypeConfiguration<UsuariosOnli
             e.HasIndex(x => new { x.IdLoja, x.Login })
              .HasDatabaseName("UX_usuarios_online_loja_login")
              .IsUnique();
-        }
+    }
 }

@@ -9,7 +9,8 @@ namespace MicroEmpresa.Repository
         Task CriarAsync(FuncionariosEntity entity);
         Task<bool> AtualizarAsync(int id, FuncionariosEntity entity);
         Task<bool> RemoverAsync(int id);
-
         Task<bool> CpfExisteAsync(string cpf, int? ignoreId = null);
+        public Task<int> BuscarIdLojaPorCnpjAsync(string cnpj);
+        public Task<bool> ExisteCnpjAsync(string cnpj);
     }
 }

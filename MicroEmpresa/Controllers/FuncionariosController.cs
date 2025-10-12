@@ -23,10 +23,20 @@ namespace MicroEmpresa.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Criar([FromBody] FuncionariosEntity entity)
+        public async Task<ResponseMessage> Criar([FromBody] FuncionariosEntity funcionariosEntity)
         {
-            var resp = await _svc.CriarAsync(entity);
-            return Ok(resp); // sempre 200 com sua mensagem/data
+            ResponseMessage responseMessage = new ResponseMessage();
+            try
+            {
+                responseMessage = await _svc.CriarAsync(funcionariosEntity);
+
+                return responseMessage;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            
         }
 
         [HttpPut("{id:int}")]

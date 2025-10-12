@@ -18,28 +18,38 @@ namespace MicroEmpresa
                 opt.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 
             // ===== Repositories =====
-            builder.Services.AddScoped<ILojasRepository, LojasData>();
-            builder.Services.AddScoped<IEnderecosRepository, EnderecosData>();
-            builder.Services.AddScoped<IClientesRepository, ClientesData>();
-            builder.Services.AddScoped<IEstoquesRepository, EstoquesData>();
             builder.Services.AddScoped<ICaixasRepository, CaixasData>();
+            builder.Services.AddScoped<IClientesRepository, ClientesData>();
+            builder.Services.AddScoped<IEnderecosRepository, EnderecosData>();
+            builder.Services.AddScoped<IEstoquesRepository, EstoquesData>();
+            builder.Services.AddScoped<IFuncionariosLogic, FuncionariosLogic>();
+            builder.Services.AddScoped<ILojasRepository, LojasData>();
             builder.Services.AddScoped<IMovCaixaRepository, MovCaixaData>();
             builder.Services.AddScoped<IMovEstoqueRepository, MovEstoqueData>();
             builder.Services.AddScoped<IPagamentosRepository, PagamentosData>();
             builder.Services.AddScoped<IProdutosRepository, ProdutosData>();
+            builder.Services.AddScoped<IUsuariosLojaRepository, UsuariosLojaData>();
             builder.Services.AddScoped<IUsuariosOnlineRepository, UsuariosOnlineData>();
+            builder.Services.AddScoped<IVendasItensRepository, VendasItensData>();
+            builder.Services.AddScoped<IVendasRepository, VendasData>();
+
 
             // ===== Logic/Services =====
-            builder.Services.AddScoped<ILojasLogic, LojasLogic>();
-            builder.Services.AddScoped<IEnderecosLogic, EnderecosLogic>();
-            builder.Services.AddScoped<IClientesLogic, ClientesLogic>();
-            builder.Services.AddScoped<IEstoquesLogic, EstoquesLogic>();
             builder.Services.AddScoped<ICaixasLogic, CaixasLogic>();
+            builder.Services.AddScoped<IClientesLogic, ClientesLogic>();
+            builder.Services.AddScoped<IEnderecosLogic, EnderecosLogic>();
+            builder.Services.AddScoped<IEstoquesLogic, EstoquesLogic>();
+            builder.Services.AddScoped<IFuncionariosRepository, FuncionariosData>();
+            builder.Services.AddScoped<ILojasLogic, LojasLogic>();
             builder.Services.AddScoped<IMovCaixaLogic, MovCaixaLogic>();
             builder.Services.AddScoped<IMovEstoqueLogic, MovEstoqueLogic>();
             builder.Services.AddScoped<IPagamentosLogic, PagamentosLogic>();
             builder.Services.AddScoped<IProdutosLogic, ProdutosLogic>();
+            builder.Services.AddScoped<IUsuariosLojaLogic, UsuariosLojaLogic>();
             builder.Services.AddScoped<IUsuariosOnlineLogic, UsuariosOnlineLogic>();
+            builder.Services.AddScoped<IVendasLogic, VendasLogic>();
+            builder.Services.AddScoped<IVendasItensLogic, VendasItensLogic>();
+            
 
             // Controllers + JSON (evita ciclos de navegação do EF)
             builder.Services.AddControllers()

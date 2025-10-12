@@ -21,10 +21,15 @@ namespace MicroEmpresa.Date
         public DbSet<EstoquesEntity> Estoques => Set<EstoquesEntity>();
         public DbSet<MovEstoqueEntity> MovimentosEstoque => Set<MovEstoqueEntity>();
         public DbSet<UsuariosOnlineEntity> UsuariosOnline => Set<UsuariosOnlineEntity>();
+        public DbSet<UsuariosLojaEntity> UsuariosLoja => Set<UsuariosLojaEntity>();
+        public DbSet<PerfisEntity> Perfis => Set<PerfisEntity>();
+        public DbSet<FuncionalidadesEntity> Funcionalidades => Set<FuncionalidadesEntity>();
+        public DbSet<PerfisFuncionalidadesEntity> PerfisFuncionalidades => Set<PerfisFuncionalidadesEntity>();
+        public DbSet<UsuariosPerfisEntity> UsuariosPerfis => Set<UsuariosPerfisEntity>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // aplica automaticamente TODAS as IEntityTypeConfiguration<> do projeto
+            // Aplica automaticamente todas as IEntityTypeConfiguration<> do assembly
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
             base.OnModelCreating(modelBuilder);
         }

@@ -4,10 +4,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MicroEmpresa.Date
 {
-    public class FuncionariosRepository : IFuncionariosRepository
+    public class FuncionariosData : IFuncionariosRepository
     {
         private readonly AppDbContext _db;
-        public FuncionariosRepository(AppDbContext db) => _db = db;
+        public FuncionariosData(AppDbContext db) => _db = db;
 
         public Task<List<FuncionariosEntity>> ListarAsync() =>
             _db.Funcionarios.AsNoTracking()
@@ -71,6 +71,37 @@ namespace MicroEmpresa.Date
             var q = _db.Funcionarios.AsNoTracking().Where(f => f.Cpf == cpf);
             if (ignoreId is not null) q = q.Where(f => f.Id != ignoreId);
             return q.AnyAsync();
+        }
+
+        // ----------------------------
+        // MÉTODOS PARA BUSCAR POR CNPJ
+        // ----------------------------
+
+        // 1) Pegar o ID da loja pelo CNPJ (retorna null se não achar ou CNPJ inválido)
+        public async Task<int> BuscarIdLojaPorCnpjAsync(string cnpj)
+        {
+            if (cnpj.Length != 14)
+            {
+                return 0; ;
+            }
+
+            var id = await _db.Lojas
+                .AsNoTracking()
+                .Where(x => x.Cnpj == cnpj)   // <- lambda
+                .Select(x => x.Id)
+                .FirstOrDefaultAsync();     // 0 se não houver
+
+            return id == 0 ? 0 : id;
+        }
+
+        // 2) Apenas verificar se existe loja com esse CNPJ
+        public async Task<bool> ExisteCnpjAsync(string cnpj)
+        {
+            if (cnpj.Length != 14) return false;
+
+            return await _db.Lojas
+                .AsNoTracking()
+                .AnyAsync(x => x.Cnpj == cnpj); // <- lambda
         }
     }
 }

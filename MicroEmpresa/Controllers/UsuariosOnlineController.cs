@@ -36,12 +36,20 @@ namespace MicroEmpresa.Controllers
         [HttpPost]
         public async Task<ActionResult<ResponseMessage>> CriarAsync([FromBody] UsuariosOnlineEntity entity)
         {
-            var r = await _logic.CriarAsync(entity);
-            if (!string.Equals(r.Message, "OK", StringComparison.OrdinalIgnoreCase))
-                return BadRequest(r);
+            try
+            {
+                var r = await _logic.CriarAsync(entity);
+                if (!string.Equals(r.Message, "OK", StringComparison.OrdinalIgnoreCase))
+                    return BadRequest(r);
 
-            var criado = await _logic.ObterPorLojaLoginAsync(entity.IdLoja, entity.Login);
-            return CreatedAtAction(nameof(ObterAsync), new { id = criado?.Id }, r);
+                var criado = await _logic.ObterPorLojaLoginAsync(entity.IdLoja, entity.Login);
+                return CreatedAtAction(nameof(ObterAsync), new { id = criado?.Id }, r);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            
         }
 
         [HttpPut("{id:int}")]
