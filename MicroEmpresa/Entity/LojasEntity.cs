@@ -3,8 +3,8 @@
     public class LojasEntity : AuditableEntity
     {
         public int Id { get; set; }
-        public string NomeFantasia { get; set; } = default!;
-        public string? Cnpj { get; set; }
+        public string? NomeFantasia { get; set; }
+        public string Cnpj { get; set; } = default!;
         public string? Telefone { get; set; }
 
         // Navegações

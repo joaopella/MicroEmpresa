@@ -32,8 +32,11 @@ namespace MicroEmpresa
             builder.Services.AddScoped<IUsuariosOnlineRepository, UsuariosOnlineData>();
             builder.Services.AddScoped<IVendasItensRepository, VendasItensData>();
             builder.Services.AddScoped<IVendasRepository, VendasData>();
-
-
+            builder.Services.AddScoped<IPerfisRepository, PerfisData>();
+            builder.Services.AddScoped<IFuncionalidadesRepository, FuncionalidadesData>();
+            builder.Services.AddScoped<IPerfisFuncionalidadesRepository, PerfisFuncionalidadesData>();
+            builder.Services.AddScoped<IUsuariosPerfisRepository, UsuariosPerfisData>();
+            
             // ===== Logic/Services =====
             builder.Services.AddScoped<ICaixasLogic, CaixasLogic>();
             builder.Services.AddScoped<IClientesLogic, ClientesLogic>();
@@ -49,7 +52,10 @@ namespace MicroEmpresa
             builder.Services.AddScoped<IUsuariosOnlineLogic, UsuariosOnlineLogic>();
             builder.Services.AddScoped<IVendasLogic, VendasLogic>();
             builder.Services.AddScoped<IVendasItensLogic, VendasItensLogic>();
-            
+            builder.Services.AddScoped<IPerfisLogic, PerfisLogic>();
+            builder.Services.AddScoped<IFuncionalidadesLogic, FuncionalidadesLogic>();
+            builder.Services.AddScoped<IPerfisFuncionalidadesLogic, PerfisFuncionalidadesLogic>();
+            builder.Services.AddScoped<IUsuariosPerfisLogic, UsuariosPerfisLogic>();
 
             // Controllers + JSON (evita ciclos de navegação do EF)
             builder.Services.AddControllers()

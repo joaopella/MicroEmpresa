@@ -53,7 +53,7 @@ namespace MicroEmpresa.Logic
                 funcionario.Telefone = SomenteDigitos(funcionario.Telefone);
             }
 
-            bool existe = await _repo.CpfExisteAsync(funcionario.Cnpj);
+            bool existe = await _repo.ExisteCnpjAsync(funcionario.Cnpj);
 
             if (existe)
             {
@@ -65,6 +65,14 @@ namespace MicroEmpresa.Logic
                 }
                 else 
                 {
+                    int PerfilId = await _repo.GetPerfilIdByNomeAsync(funcionario.PerfilNome);
+
+                    if (PerfilId <= 0)
+                    {
+                        return new ResponseMessage { Message = "Perfil não encontrado." };
+                    }
+
+                    funcionario.IdPerfil = PerfilId;
                     funcionario.IdLoja = id;
 
                     await _repo.CriarAsync(funcionario);
@@ -73,7 +81,7 @@ namespace MicroEmpresa.Logic
             }
             else
             {
-                return new ResponseMessage { Message = "CNPJ inválido." };
+                return new ResponseMessage { Message = "CNPJ inválido ou loja não encontrada." };
             }
         }
 
@@ -120,7 +128,9 @@ namespace MicroEmpresa.Logic
             Nome = f.Nome?.Trim(),
             Cpf = f.Cpf?.Trim(),
             Email = f.Email?.Trim(),
-            Telefone = f.Telefone?.Trim()
+            Telefone = f.Telefone?.Trim(),
+            Cnpj = f.Cnpj.Trim(),
+            PerfilNome = f.PerfilNome.Trim()
         };
 
         private static string SomenteDigitos(string s) => new(s.Where(char.IsDigit).ToArray());

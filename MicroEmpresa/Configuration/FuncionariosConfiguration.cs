@@ -12,7 +12,7 @@ namespace MicroEmpresa.Configuration
             e.HasKey(x => x.Id);
 
             e.Property(x => x.Id).HasColumnName("id");
-            e.Property(x => x.IdLoja).HasColumnName("id_loja").IsRequired();
+            e.Property(x => x.IdLoja).HasColumnName("id_loja");
 
             e.Property(x => x.Nome).HasColumnName("nome").HasMaxLength(150).IsRequired();
             e.Property(x => x.Cpf).HasColumnName("cpf").HasColumnType("char(11)");
@@ -20,7 +20,7 @@ namespace MicroEmpresa.Configuration
             e.Property(x => x.Telefone).HasColumnName("telefone").HasMaxLength(20);
 
             // -> remove 'cargo' e usa FK para perfis
-            e.Property(x => x.IdPerfil).HasColumnName("id_perfil").IsRequired();
+            e.Property(x => x.IdPerfil).HasColumnName("id_perfil");
 
             e.Property(x => x.Ativo).HasColumnName("ativo");
 

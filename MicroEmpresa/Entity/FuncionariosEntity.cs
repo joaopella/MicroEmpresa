@@ -18,11 +18,15 @@ namespace MicroEmpresa.Entity
         public int IdPerfil { get; set; }
 
         // Navegações
-        public LojasEntity Loja { get; set; } = default!;
-        public PerfisEntity Perfil { get; set; } = default!;
+        public LojasEntity? Loja { get; set; }
+        public PerfisEntity? Perfil { get; set; } 
 
         // Só para input/consulta (não existe na tabela)
         [NotMapped]
         public string? Cnpj { get; set; }
+        [NotMapped] 
+        public string? PerfilNome { get; set; }
+
+
     }
 }

@@ -12,5 +12,6 @@ namespace MicroEmpresa.Repository
         Task<bool> CpfExisteAsync(string cpf, int? ignoreId = null);
         public Task<int> BuscarIdLojaPorCnpjAsync(string cnpj);
         public Task<bool> ExisteCnpjAsync(string cnpj);
+        Task<int> GetPerfilIdByNomeAsync(string? nome);
     }
 }

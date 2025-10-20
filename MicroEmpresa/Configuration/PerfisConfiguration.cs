@@ -12,6 +12,7 @@ namespace MicroEmpresa.Configuration
             e.HasKey(x => x.Id);
 
             e.Property(x => x.Id).HasColumnName("id");
+
             e.Property(x => x.Nome)
                 .HasColumnName("nome")
                 .HasMaxLength(80)
@@ -21,11 +22,24 @@ namespace MicroEmpresa.Configuration
                 .HasColumnName("descricao")
                 .HasMaxLength(200);
 
-            e.Property(x => x.CriadoEm).HasColumnName("criado_em");
-            e.Property(x => x.AtualizadoEm).HasColumnName("atualizado_em");
-            e.Property(x => x.Rv).HasColumnName("rv").IsRowVersion().IsConcurrencyToken();
+            // >>> Datas geradas pelo banco
+            e.Property(x => x.CriadoEm)
+             .HasColumnName("criado_em")
+             .HasColumnType("datetime2(0)")
+             .HasDefaultValueSql("SYSUTCDATETIME()") // default no INSERT
+             .ValueGeneratedOnAdd();
 
-            // (Opcional) nome único de perfil
+            e.Property(x => x.AtualizadoEm)
+             .HasColumnName("atualizado_em")
+             .HasColumnType("datetime2(0)")
+             .HasDefaultValueSql("SYSUTCDATETIME()") // default no INSERT
+             .ValueGeneratedOnAddOrUpdate();         // trigger atualiza no UPDATE
+
+            e.Property(x => x.Rv)
+             .HasColumnName("rv")
+             .IsRowVersion()
+             .IsConcurrencyToken();
+
             e.HasIndex(x => x.Nome)
              .IsUnique()
              .HasDatabaseName("UQ_perfis_nome");

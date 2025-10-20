@@ -95,13 +95,32 @@ namespace MicroEmpresa.Date
         }
 
         // 2) Apenas verificar se existe loja com esse CNPJ
-        public async Task<bool> ExisteCnpjAsync(string cnpj)
+        public Task<bool> ExisteCnpjAsync(string? cnpj)
         {
-            if (cnpj.Length != 14) return false;
+            if (string.IsNullOrWhiteSpace(cnpj))
+                return Task.FromResult(false);
 
-            return await _db.Lojas
+            var only = new string(cnpj.Where(char.IsDigit).ToArray());
+            if (only.Length != 14)
+                return Task.FromResult(false);
+
+            return _db.Lojas
                 .AsNoTracking()
-                .AnyAsync(x => x.Cnpj == cnpj); // <- lambda
+                .AnyAsync(x => x.Cnpj == only);
+        }
+
+        //SQL_Latin1_General → regras de ordenação/comparação para idiomas latinos (pt-BR, en, es…).
+        //CP1 → code page 1252 (Windows-1252).
+        //CI(Case Insensitive) → ignora maiúsculas/minúsculas("admin" = "Admin").
+        //AI(Accent Insensitive) → ignora acentos("Joao" = "João").
+
+        public Task<int> GetPerfilIdByNomeAsync(string? nome)
+        {
+            return _db.Set<PerfisEntity>()
+                .AsNoTracking()
+                .Where(p => EF.Functions.Collate(p.Nome!, "SQL_Latin1_General_CP1_CI_AI") == nome)
+                .Select(p => (int)p.Id)
+                .FirstOrDefaultAsync();
         }
     }
 }
